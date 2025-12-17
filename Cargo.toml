@@ -1,0 +1,15 @@
+[package]
+name = "autodiff_emb"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+nalgebra = { version = "0.32", default-features = false }
+num-traits = { version = "0.2", default-features = false }
+libm = { version = "0.2", optional = true }
+
+[features]
+default = ["std"]
+libm = ["dep:libm"]
+std = ["num-traits/std", "nalgebra/std"]
+alloc = ["nalgebra/alloc"]
