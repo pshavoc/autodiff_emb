@@ -68,7 +68,8 @@ mod tests {
         use nalgebra::{SVector, OVector, VectorView, U1, U2};
 
         fn my_fn(x: VectorView<'_, Dual32, U2>) -> OVector<Dual32, U1> {
-            OVector::<Dual32, U1>::from_row_slice(&[x[0] * x[0] + x[1]])
+            let y = x[0] * x[0] + Dual32::from_re(2.0) * x[1];
+            OVector::<Dual32, U1>::from_row_slice(&[y])
         }
 
         let x = SVector::<Dual32, 2>::from_row_slice(&[Dual32::from_re(3.0), Dual32::from_re(5.0)]);
@@ -77,7 +78,7 @@ mod tests {
 
         let jac = jacobian(my_fn, x.as_view());
         assert_eq!(jac[(0, 0)], 6.0);
-        assert_eq!(jac[(1, 0)], 1.0);
+        assert_eq!(jac[(1, 0)], 2.0);
 
     }
 }
