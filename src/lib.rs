@@ -77,6 +77,7 @@ mod tests {
 
         let jac = jacobian(my_fn, x.as_view());
         assert_eq!(jac[(0, 0)], 6.0);
+        assert_eq!(jac[(1, 0)], 1.0);
 
     }
 }
