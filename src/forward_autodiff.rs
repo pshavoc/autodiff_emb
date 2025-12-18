@@ -136,7 +136,6 @@ impl<T: DualNumFloat> Div<Dual<T>> for Dual<T> {
 }
 
 impl<T: DualNumFloat> Dual<T> {
-
     #[cfg(any(feature = "std", feature = "libm"))]
     #[inline]
     pub fn sin(&self) -> Self {
@@ -285,7 +284,6 @@ where
 }
 
 impl DualNumFloat for f32 {
-
     #[cfg(feature = "libm")]
     fn sin_cos(&self) -> (Self, Self) {
         use libm::sincosf;
