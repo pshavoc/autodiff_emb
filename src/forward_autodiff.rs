@@ -3,7 +3,7 @@ use core::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign},
 };
 
-use nalgebra::{Scalar, SimdValue};
+use nalgebra::{SimdValue};
 #[cfg(feature = "std")]
 use num_traits::Float;
 
@@ -288,6 +288,11 @@ impl DualNumFloat for f32 {
     fn sin_cos(&self) -> (Self, Self) {
         use libm::sincosf;
         sincosf(*self)
+    }
+
+    #[cfg(feature = "std")]
+    fn sin_cos(&self) -> (Self, Self) {
+        self.sin_cos()
     }
 }
 
