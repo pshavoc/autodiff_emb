@@ -9,22 +9,60 @@
 #[cfg_attr(test, macro_use)]
 extern crate alloc;
 
+pub mod prelude {
+
+    pub(crate) use core::{
+        any::Any,
+        fmt,
+        ops::{
+            Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
+        },
+    };
+
+    #[cfg(any(feature = "std", feature = "libm"))]
+    pub(crate) use num_traits::Float;
+
+    #[cfg(all(not(feature = "std"), not(feature = "libm")))]
+    pub(crate) use num_traits::float::FloatCore as Float;
+
+    pub(crate) use num_traits::{FloatConst, FromPrimitive, Num, NumOps, One, Signed, Zero};
+
+    pub(crate) use nalgebra::{
+        ComplexField, Field, RealField, SMatrix, SVector, SimdValue, VectorView,
+    };
+}
+
 mod forward_autodiff;
 pub use forward_autodiff::*;
-use nalgebra::SVector;
 
-pub fn jacobian<G, T, const N: usize, const M: usize>(
-    g: G,
-    x: nalgebra::VectorView<'_, Dual<T>, nalgebra::Const<N>>,
-) -> nalgebra::SMatrix<T, N, M>
+use prelude::*;
+
+pub trait DualNumFloat: Float + SimdValue<Element = Self, SimdBool = bool> + fmt::Debug + fmt::Display + 'static {}
+
+impl DualNumFloat for f32 {}
+impl DualNumFloat for f64 {}
+
+pub trait DualNum<T>
 where
-    G: Fn(
-        nalgebra::VectorView<'_, Dual<T>, nalgebra::Const<N>>,
-    ) -> nalgebra::SVector<Dual<T>, { M }>,
+    Self: Field + FromPrimitive + Clone + Copy + Send + Sync + Any + fmt::Debug + fmt::Display + 'static,
     T: DualNumFloat,
 {
-    let mut jac = nalgebra::SMatrix::<T, N, M>::zeros();
-    let mut x_p = SVector::<Dual<T>, N>::zeros();
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+pub trait RealDualNum<T>: DualNum<T> + RealField {}
+
+
+pub fn jacobian<G, F, const N: usize, const M: usize>(
+    g: G,
+    x: VectorView<'_, Dual<F>, nalgebra::Const<N>>,
+) -> SMatrix<F, N, M>
+where
+    G: Fn(VectorView<'_, Dual<F>, nalgebra::Const<N>>) -> SVector<Dual<F>, { M }>,
+    F: DualNumFloat,
+{
+    let mut jac = SMatrix::<F, N, M>::zeros();
+    let mut x_p = SVector::<Dual<F>, N>::zeros();
 
     for i in 0..N {
         for j in 0..N {
