@@ -312,283 +312,166 @@ impl<T> nalgebra::Field for Dual<T>
 {}
 
 
-impl<T> num_traits::FromPrimitive for Dual<T>
-where
-    T: DualNumFloat
-{
-    fn from_i64(n: i64) -> Option<Self> {
-        // Some(Self::from_re(n as T))
-        todo!()
-    }
+macro_rules! impl_from_primitive_for_scalar(
+    ($t:ty) => {
+        impl num_traits::FromPrimitive for Dual<$t> {
+            fn from_i64(n: i64) -> Option<Self> {
+                Some(Self::from_re(n as $t))
+            }
 
-    fn from_u64(n: u64) -> Option<Self> {
-        todo!()
-    }
-}
+            fn from_u64(n: u64) -> Option<Self> {
+                Some(Self::from_re(n as $t))
+            }
 
-/* 
-impl<T> nalgebra::ComplexField for Dual<T>
-where
-    T: DualNumFloat
-{
-    type RealField = Self;
+            fn from_f32(n: f32) -> Option<Self> {
+                Some(Self::from_re(n as $t))
+            }
 
-    #[inline]
-    fn from_real(re: Self::RealField) -> Self {
-        re
-    }
-
-    #[inline]
-    fn real(self) -> Self::RealField {
-        self
-    }
-
-    #[inline]
-    fn imaginary(self) -> Self::RealField {
-        Self::zero()
-    }
-
-    #[inline]
-    fn modulus(self) -> Self::RealField {
-        self.abs()
-    }
-
-    #[inline]
-    fn modulus_squared(self) -> Self::RealField {
-        self * self
-    }
-
-    #[inline]
-    fn argument(self) -> Self::RealField {
-        Self::zero()
-    }
-
-    #[inline]
-    fn norm1(self) -> Self::RealField {
-        self.abs()
-    }
-
-    #[inline]
-    fn scale(self, factor: Self::RealField) -> Self {
-        self * factor
-    }
-
-    #[inline]
-    fn unscale(self, factor: Self::RealField) -> Self {
-        self / factor
-    }
-
-    #[inline]
-    fn floor(self) -> Self {
-        panic!("called floor() on a dual number")
-    }
-
-    #[inline]
-    fn ceil(self) -> Self {
-        panic!("called ceil() on a dual number")
-    }
-
-    #[inline]
-    fn round(self) -> Self {
-        panic!("called round() on a dual number")
-    }
-
-    #[inline]
-    fn trunc(self) -> Self {
-        panic!("called trunc() on a dual number")
-    }
-
-    #[inline]
-    fn fract(self) -> Self {
-        panic!("called fract() on a dual number")
-    }
-
-    #[inline]
-    fn mul_add(self, a: Self, b: Self) -> Self {
-        DualNum::mul_add(&self, a, b)
-    }
-
-    #[inline]
-    fn abs(self) -> Self::RealField {
-        Signed::abs(&self)
-    }
-
-    #[inline]
-    fn hypot(self, other: Self) -> Self::RealField {
-        let sum_sq = self.powi(2) + other.powi(2);
-        DualNum::sqrt(&sum_sq)
-    }
-
-    #[inline]
-    fn recip(self) -> Self {
-        DualNum::recip(&self)
-    }
-
-    #[inline]
-    fn conjugate(self) -> Self {
-        self
-    }
-
-    #[inline]
-    fn sin(self) -> Self {
-        DualNum::sin(&self)
-    }
-
-    #[inline]
-    fn cos(self) -> Self {
-        DualNum::cos(&self)
-    }
-
-    #[inline]
-    fn sin_cos(self) -> (Self, Self) {
-        DualNum::sin_cos(&self)
-    }
-
-    #[inline]
-    fn tan(self) -> Self {
-        DualNum::tan(&self)
-    }
-
-    #[inline]
-    fn asin(self) -> Self {
-        DualNum::asin(&self)
-    }
-
-    #[inline]
-    fn acos(self) -> Self {
-        DualNum::acos(&self)
-    }
-
-    #[inline]
-    fn atan(self) -> Self {
-        DualNum::atan(&self)
-    }
-
-    #[inline]
-    fn sinh(self) -> Self {
-        DualNum::sinh(&self)
-    }
-
-    #[inline]
-    fn cosh(self) -> Self {
-        DualNum::cosh(&self)
-    }
-
-    #[inline]
-    fn tanh(self) -> Self {
-        DualNum::tanh(&self)
-    }
-
-    #[inline]
-    fn asinh(self) -> Self {
-        DualNum::asinh(&self)
-    }
-
-    #[inline]
-    fn acosh(self) -> Self {
-        DualNum::acosh(&self)
-    }
-
-    #[inline]
-    fn atanh(self) -> Self {
-        DualNum::atanh(&self)
-    }
-
-    #[inline]
-    fn log(self, base: Self::RealField) -> Self {
-        DualNum::ln(&self) / DualNum::ln(&base)
-    }
-
-    #[inline]
-    fn log2(self) -> Self {
-        DualNum::log2(&self)
-    }
-
-    #[inline]
-    fn log10(self) -> Self {
-        DualNum::log10(&self)
-    }
-
-    #[inline]
-    fn ln(self) -> Self {
-        DualNum::ln(&self)
-    }
-
-    #[inline]
-    fn ln_1p(self) -> Self {
-        DualNum::ln_1p(&self)
-    }
-
-    #[inline]
-    fn sqrt(self) -> Self {
-        DualNum::sqrt(&self)
-    }
-
-    #[inline]
-    fn exp(self) -> Self {
-        DualNum::exp(&self)
-    }
-
-    #[inline]
-    fn exp2(self) -> Self {
-        DualNum::exp2(&self)
-    }
-
-    #[inline]
-    fn exp_m1(self) -> Self {
-        DualNum::exp_m1(&self)
-    }
-
-    #[inline]
-    fn powi(self, n: i32) -> Self {
-        DualNum::powi(&self, n)
-    }
-
-    #[inline]
-    fn powf(self, n: Self::RealField) -> Self {
-        // n could be a dual.
-        DualNum::powd(&self, n)
-    }
-
-    #[inline]
-    fn powc(self, n: Self) -> Self {
-        // same as powf, Self isn't complex
-        self.powf(n)
-    }
-
-    #[inline]
-    fn cbrt(self) -> Self {
-        DualNum::cbrt(&self)
-    }
-
-    #[inline]
-    fn is_finite(&self) -> bool {
-        self.re.is_finite()
-    }
-
-    #[inline]
-    fn try_sqrt(self) -> Option<Self> {
-        if self > Self::zero() {
-            Some(DualNum::sqrt(&self))
-        } else {
-            None
+            fn from_f64(n: f64) -> Option<Self> {
+                Some(Self::from_re(n as $t))
+            }
         }
     }
-    
-}
+);
 
-impl<T> nalgebra::RealField for Dual<T>
+impl_from_primitive_for_scalar!(f32);
+impl_from_primitive_for_scalar!(f64);
+
+macro_rules! impl_complex_field_for_scalar(
+    ($t:ty) => {
+        impl nalgebra::ComplexField for Dual<$t> {
+            type RealField = Self;
+
+            #[inline]
+            fn from_real(re: Self::RealField) -> Self {
+                re
+            }
+
+            #[inline]
+            fn real(self) -> Self::RealField {
+                self
+            }
+
+            #[inline]
+            fn imaginary(self) -> Self::RealField {
+                Self::zero()
+            }
+
+            #[inline]
+            fn norm1(self) -> Self::RealField {
+                self.abs()
+            }
+
+            #[inline]
+            fn modulus(self) -> Self::RealField {
+                self.abs()
+            }
+
+            #[inline]
+            fn modulus_squared(self) -> Self::RealField {
+                self * self
+            }
+
+            #[inline]
+            fn argument(self) -> Self::RealField {
+                if self >= Self::zero() {
+                    Self::zero()
+                } else {
+                    Self::pi()
+                }
+            }
+
+            #[inline]
+            fn to_exp(self) -> (Self, Self) {
+                todo!()
+            }
+
+            #[inline]
+            fn recip(self) -> Self {
+                todo!()
+            }
+
+            #[inline]
+            fn conjugate(self) -> Self {
+                self
+            }
+
+            #[inline]
+            fn scale(self, factor: Self::RealField) -> Self {
+                self * factor
+            }
+
+            #[inline]
+            fn unscale(self, factor: Self::RealField) -> Self {
+                self / factor
+            }
+
+            #[inline]
+            fn floor(self) -> Self {
+                panic!("called floor() on a dual number")
+            }
+
+            #[inline]
+            fn ceil(self) -> Self {
+                panic!("called ceil() on a dual number")
+            }
+
+            #[inline]
+            fn round(self) -> Self {
+                panic!("called round() on a dual number")
+            }
+
+            #[inline]
+            fn trunc(self) -> Self {
+                panic!("called trunc() on a dual number")
+            }
+
+            #[inline]
+            fn fract(self) -> Self {
+                panic!("called fract() on a dual number")
+            }
+
+            #[inline]
+            fn abs(self) -> Self::RealField {
+                Signed::abs(&self)
+            }
+
+            #[inline]
+            fn signum(self) -> Self {
+                todo!()
+            }
+
+            #[inline]
+            fn mul_add(self, a: Self, b: Self) -> Self {
+                todo!()
+            }
+
+            #[inline]
+            fn powi(self, n: i32) -> Self {
+                todo!()
+            }
+        }
+    }
+);
+
+impl_complex_field_for_scalar!(f32);
+impl_complex_field_for_scalar!(f64);
+
+
+
+
+/*
+impl<T> RealField for Dual<T>
 where
-    T: DualNumFloat + SimdValue,
-    T::Element: DualNumFloat + SimdValue,
+    T: DualNumFloat
 {
 
     #[inline]
     fn copysign(self, sign: Self) -> Self {
         if sign.re.is_sign_positive() {
-            self.simd_abs()
+            self.abs()
         } else {
-            -self.simd_abs()
+            -self.abs()
         }
     }
 
@@ -718,5 +601,4 @@ where
 
 }
 
-
- */
+*/

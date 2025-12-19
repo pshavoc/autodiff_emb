@@ -37,7 +37,7 @@ pub use forward_autodiff::*;
 
 use prelude::*;
 
-pub trait DualNumFloat: Float + SimdValue<Element = Self, SimdBool = bool> + fmt::Debug + fmt::Display + 'static {}
+pub trait DualNumFloat: Float + FloatConst + SimdValue<Element = Self, SimdBool = bool> + Clone + Copy + Send + Sync + fmt::Debug + fmt::Display + 'static {}
 
 impl DualNumFloat for f32 {}
 impl DualNumFloat for f64 {}
