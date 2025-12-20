@@ -636,6 +636,7 @@ impl<T> RealField for Dual<T>
 where
     T: DualNumFloat,
     T: simba::scalar::SubsetOf<Dual<T>>,
+    T: simba::scalar::SupersetOf<T>,
     T: simba::scalar::SupersetOf<f64>,
     T: approx::RelativeEq + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
 {
