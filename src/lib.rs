@@ -44,7 +44,7 @@ impl DualNumFloat for f64 {}
 
 pub trait DualNum<T>
 where
-    Self: Field + FromPrimitive + Clone + Copy + Send + Sync + Any + fmt::Debug + fmt::Display + 'static,
+    Self: Field + FromPrimitive + From<T> + NumOps<T> + Clone + Copy + Send + Sync + Any + fmt::Debug + fmt::Display + 'static,
     T: DualNumFloat,
 {
 

@@ -21,6 +21,64 @@ where
     }
 }
 
+impl<T> From<T> for Dual<T>
+where T: DualNumFloat,
+{
+    fn from(value: T) -> Self {
+        Self::from_re(value)
+    }
+}
+
+impl<T> Add<T> for Dual<T>
+where T: DualNumFloat,
+{
+    type Output = Dual<T>;
+
+    fn add(self, rhs: T) -> Self::Output {
+        self + Self::from_re(rhs)
+    }
+}
+
+impl<T> Sub<T> for Dual<T>
+where T: DualNumFloat,
+{
+    type Output = Dual<T>;
+
+    fn sub(self, rhs: T) -> Self::Output {
+        self - Self::from_re(rhs)
+    }
+}
+
+impl<T> Mul<T> for Dual<T>
+where T: DualNumFloat,
+{
+    type Output = Dual<T>;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        self * Self::from_re(rhs)
+    }
+}
+
+impl<T> Div<T> for Dual<T>
+where T: DualNumFloat,
+{
+    type Output = Dual<T>;
+
+    fn div(self, rhs: T) -> Self::Output {
+        self / Self::from_re(rhs)
+    }
+}
+
+impl<T> Rem<T> for Dual<T>
+where T: DualNumFloat,
+{
+    type Output = Dual<T>;
+
+    fn rem(self, rhs: T) -> Self::Output {
+        self % Self::from_re(rhs)
+    }
+}
+
 impl<T: DualNumFloat> Dual<T> {
     #[inline]
     pub fn new(re: T, eps: T) -> Self {
