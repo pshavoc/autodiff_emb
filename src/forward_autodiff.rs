@@ -481,15 +481,15 @@ where T: DualNumFloat + simba::scalar::SupersetOf<f64>
     }
 }
 
-impl<TSuper, T> simba::scalar::SubsetOf<Dual<TSuper>> for Dual<T>
+impl<FSuper, F> simba::scalar::SubsetOf<Dual<FSuper>> for Dual<F>
 where 
-    TSuper: DualNumFloat + simba::scalar::SupersetOf<T>,
-    T: DualNumFloat
+    FSuper: DualNumFloat + simba::scalar::SupersetOf<F>,
+    F: DualNumFloat
 {
     #[inline(always)]
-    fn to_superset(&self) -> Dual<TSuper> {
-        let re = TSuper::from_subset(&self.re);
-        let eps = TSuper::from_subset(&self.eps);
+    fn to_superset(&self) -> Dual<FSuper> {
+        let re = FSuper::from_subset(&self.re);
+        let eps = FSuper::from_subset(&self.eps);
         Dual {
             re,
             eps,
@@ -497,15 +497,15 @@ where
     }
 
     #[inline(always)]
-    fn from_superset_unchecked(element: &Dual<TSuper>) -> Self {
-        let re = TSuper::to_subset_unchecked(&element.re);
-        let eps = TSuper::to_subset_unchecked(&element.eps);
+    fn from_superset_unchecked(element: &Dual<FSuper>) -> Self {
+        let re = FSuper::to_subset_unchecked(&element.re);
+        let eps = FSuper::to_subset_unchecked(&element.eps);
         Self::new(re, eps)
     }
 
     #[inline(always)]
-    fn is_in_subset(element: &Dual<TSuper>) -> bool {
-        TSuper::is_in_subset(&element.re) && TSuper::is_in_subset(&element.eps)
+    fn is_in_subset(element: &Dual<FSuper>) -> bool {
+        FSuper::is_in_subset(&element.re) && FSuper::is_in_subset(&element.eps)
     }
 }
 
