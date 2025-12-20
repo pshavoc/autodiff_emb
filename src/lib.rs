@@ -47,10 +47,15 @@ where
     Self: Field + FromPrimitive + Clone + Copy + Send + Sync + Any + fmt::Debug + fmt::Display + 'static,
     T: DualNumFloat,
 {
+
+    #[cfg(any(feature = "std", feature = "libm"))]
+    fn sin(&self) -> Self;
+
 }
 
 #[cfg(any(feature = "std", feature = "libm"))]
-pub trait RealDualNum<T>: DualNum<T> + RealField {}
+pub trait RealDualNum<T>: DualNum<T> + RealField
+where T: DualNumFloat {}
 
 
 pub fn jacobian<G, F, const N: usize, const M: usize>(

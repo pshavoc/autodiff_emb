@@ -10,6 +10,17 @@ pub struct Dual<T: DualNumFloat> {
 pub type Dual32 = Dual<f32>;
 pub type Dual64 = Dual<f64>;
 
+impl<T> DualNum<T> for Dual<T>
+where 
+    T: DualNumFloat,
+{
+    #[cfg(any(feature = "std", feature = "libm"))]
+    fn sin(&self) -> Self {
+        let (s, c) = self.re.sin_cos();
+        self.chain_rule(s, c)
+    }
+}
+
 impl<T: DualNumFloat> Dual<T> {
     #[inline]
     pub fn new(re: T, eps: T) -> Self {
@@ -430,27 +441,27 @@ where
 
     #[doc = r" Builds a pure-real complex number from the given value."]
     fn from_real(re:Self::RealField) -> Self {
-        todo!()
+        re
     }
 
     #[doc = r" The real part of this complex number."]
     fn real(self) -> Self::RealField {
-        todo!()
+        self
     }
 
     #[doc = r" The imaginary part of this complex number."]
     fn imaginary(self) -> Self::RealField {
-        todo!()
+        Self::zero()
     }
 
     #[doc = r" The modulus of this complex number."]
     fn modulus(self) -> Self::RealField {
-        todo!()
+        self.abs()
     }
 
     #[doc = r" The squared modulus of this complex number."]
     fn modulus_squared(self) -> Self::RealField {
-        todo!()
+        self * self
     }
 
     #[doc = r" The argument of this complex number."]
@@ -460,37 +471,37 @@ where
 
     #[doc = r" The sum of the absolute value of this complex number's real and imaginary part."]
     fn norm1(self) -> Self::RealField {
-        todo!()
+        self.abs()
     }
 
     #[doc = r" Multiplies this complex number by `factor`."]
-    fn scale(self,factor:Self::RealField) -> Self {
-        todo!()
+    fn scale(self, factor: Self::RealField) -> Self {
+        self * factor
     }
 
     #[doc = r" Divides this complex number by `factor`."]
-    fn unscale(self,factor:Self::RealField) -> Self {
-        todo!()
+    fn unscale(self, factor: Self::RealField) -> Self {
+        self / factor
     }
 
     fn floor(self) -> Self {
-        todo!()
+        panic!("called floor() on a dual number")
     }
 
     fn ceil(self) -> Self {
-        todo!()
+        panic!("called ceil() on a dual number")
     }
 
     fn round(self) -> Self {
-        todo!()
+        panic!("called round() on a dual number")
     }
 
     fn trunc(self) -> Self {
-        todo!()
+        panic!("called trunc() on a dual number")
     }
 
     fn fract(self) -> Self {
-        todo!()
+        panic!("called fract() on a dual number")
     }
 
     fn mul_add(self,a:Self,b:Self) -> Self {
@@ -501,7 +512,7 @@ where
     #[doc = r""]
     #[doc = r" This is equivalent to `self.modulus()`."]
     fn abs(self) -> Self::RealField {
-        todo!()
+        Signed::abs(&self)
     }
 
     #[doc = r" Computes (self.conjugate() * self + other.conjugate() * other).sqrt()"]
@@ -514,11 +525,19 @@ where
     }
 
     fn conjugate(self) -> Self {
-        todo!()
+        self
     }
 
     fn sin(self) -> Self {
-        todo!()
+
+        #[cfg(not(any(feature = "std", feature = "libm")))]
+        panic!("sin() not available because neither the 'std' nor the 'libm' feature is enabled");
+
+        #[cfg(any(feature = "std", feature = "libm"))]
+        DualNum::sin(&self)
+
+        
+        
     }
 
     fn cos(self) -> Self {
