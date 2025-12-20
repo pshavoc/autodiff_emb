@@ -437,6 +437,28 @@ where T: DualNumFloat + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
     }
 }
 
+impl<T> simba::scalar::SupersetOf<f32> for Dual<T>
+where T: DualNumFloat + simba::scalar::SupersetOf<f32> 
+{
+
+    #[inline(always)]
+    fn is_in_subset(&self) -> bool {
+        self.re.is_in_subset()
+    }
+
+    #[inline(always)]
+    fn to_subset_unchecked(&self) -> f32 {
+        self.re.to_subset_unchecked()
+    }
+
+    #[inline(always)]
+    fn from_subset(element: &f32) -> Self {
+        let re = T::from_subset(element);
+        let eps = T::zero();
+        Self::new(re, eps)
+    }
+}
+
 impl<T> simba::scalar::SupersetOf<f64> for Dual<T>
 where T: DualNumFloat + simba::scalar::SupersetOf<f64> 
 {
@@ -492,6 +514,7 @@ where
     T: DualNumFloat,
     T: simba::scalar::SubsetOf<Dual<T>>,
     T: simba::scalar::SupersetOf<T>,
+    T: simba::scalar::SupersetOf<f32>,
     T: simba::scalar::SupersetOf<f64>,
     T: approx::RelativeEq + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
 {
@@ -714,6 +737,7 @@ where
     T: DualNumFloat,
     T: simba::scalar::SubsetOf<Dual<T>>,
     T: simba::scalar::SupersetOf<T>,
+    T: simba::scalar::SupersetOf<f32>,
     T: simba::scalar::SupersetOf<f64>,
     T: approx::RelativeEq + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
 {
