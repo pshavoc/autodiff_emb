@@ -512,7 +512,8 @@ where
 impl<T> ComplexField for Dual<T>
 where
     T: DualNumFloat,
-    T: simba::scalar::SubsetOf<Dual<T>>,
+    // T: simba::scalar::SubsetOf<Dual<T>>,
+    T: simba::scalar::SupersetOf<T::Element>,
     T: simba::scalar::SupersetOf<T>,
     T: simba::scalar::SupersetOf<f32>,
     T: simba::scalar::SupersetOf<f64>,
@@ -735,7 +736,8 @@ where
 impl<T> RealField for Dual<T>
 where
     T: DualNumFloat,
-    T: simba::scalar::SubsetOf<Dual<T>>,
+    // T: simba::scalar::SubsetOf<Dual<T>>,
+    T: simba::scalar::SupersetOf<T::Element>,
     T: simba::scalar::SupersetOf<T>,
     T: simba::scalar::SupersetOf<f32>,
     T: simba::scalar::SupersetOf<f64>,
