@@ -28,7 +28,7 @@ pub mod prelude {
     pub(crate) use num_traits::{FloatConst, FromPrimitive, Num, NumOps, One, Signed, Zero};
 
     pub(crate) use nalgebra::{
-        ComplexField, Field, RealField, SMatrix, SVector, SimdValue, VectorView,
+        ComplexField, Field, RealField, SMatrix, SVector, SimdValue, VectorView, SimdPartialOrd
     };
 }
 
@@ -37,7 +37,7 @@ pub use forward_autodiff::*;
 
 use prelude::*;
 
-pub trait DualNumFloat: Float + FloatConst + SimdValue<Element = Self, SimdBool = bool> + Clone + Copy + Send + Sync + fmt::Debug + fmt::Display + 'static {}
+pub trait DualNumFloat: Float + FloatConst + SimdValue<Element = Self, SimdBool = bool> + SimdPartialOrd + FromPrimitive + Clone + Copy + Send + Sync + fmt::Debug + fmt::Display + 'static {}
 
 impl DualNumFloat for f32 {}
 impl DualNumFloat for f64 {}

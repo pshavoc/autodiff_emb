@@ -52,8 +52,7 @@ impl<T: DualNumFloat> PartialOrd for Dual<T> {
     }
 }
 
-impl<T: DualNumFloat> Signed for Dual<T>
-{
+impl<T: DualNumFloat> Signed for Dual<T> {
     #[inline]
     fn abs(&self) -> Self {
         if self.is_positive() {
@@ -307,163 +306,338 @@ where
     }
 }
 
-impl<T> nalgebra::Field for Dual<T>
-    where T: DualNumFloat
-{}
+impl<T> nalgebra::Field for Dual<T> where T: DualNumFloat {}
 
 
-macro_rules! impl_from_primitive_for_scalar(
-    ($t:ty) => {
-        impl num_traits::FromPrimitive for Dual<$t> {
-            fn from_i64(n: i64) -> Option<Self> {
-                Some(Self::from_re(n as $t))
-            }
+impl<T> FromPrimitive for Dual<T>
+where T: DualNumFloat
+{
+    fn from_i64(n: i64) -> Option<Self> {
+        Some(Self::from_re(T::from_i64(n)?))
+    }
 
-            fn from_u64(n: u64) -> Option<Self> {
-                Some(Self::from_re(n as $t))
-            }
+    fn from_u64(n: u64) -> Option<Self> {
+        Some(Self::from_re(T::from_u64(n)?))
+    }
 
-            fn from_f32(n: f32) -> Option<Self> {
-                Some(Self::from_re(n as $t))
-            }
+    fn from_f32(n: f32) -> Option<Self> {
+        Some(Self::from_re(T::from_f32(n)?))
+    }
 
-            fn from_f64(n: f64) -> Option<Self> {
-                Some(Self::from_re(n as $t))
-            }
+    fn from_f64(n: f64) -> Option<Self> {
+        Some(Self::from_re(T::from_f64(n)?))
+    }
+}
+
+impl<T> approx::AbsDiffEq for Dual<T>
+where T: DualNumFloat + approx::AbsDiffEq<Epsilon = T>,
+{
+    type Epsilon = Self;
+    
+    fn default_epsilon() -> Self::Epsilon {
+        Self::from_re(T::default_epsilon())
+    }
+    
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.re.abs_diff_eq(&other.re, epsilon.re)
+    }
+}
+
+impl<T> approx::RelativeEq for Dual<T>
+where T: DualNumFloat + approx::AbsDiffEq<Epsilon = T>,
+{
+    fn default_max_relative() -> Self::Epsilon {
+        todo!()
+    }
+
+    fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon)
+        -> bool {
+        todo!()
+    }
+}
+
+impl<T> approx::UlpsEq for Dual<T>
+where T: DualNumFloat + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
+{
+    fn default_max_ulps() -> u32 {
+        todo!()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        todo!()
+    }
+}
+
+impl<T> simba::scalar::SupersetOf<f64> for Dual<T>
+where T: DualNumFloat + simba::scalar::SupersetOf<f64> 
+{
+
+    #[inline(always)]
+    fn is_in_subset(&self) -> bool {
+        self.re.is_in_subset()
+    }
+
+    #[inline(always)]
+    fn to_subset_unchecked(&self) -> f64 {
+        self.re.to_subset_unchecked()
+    }
+
+    #[inline(always)]
+    fn from_subset(element: &f64) -> Self {
+        let re = T::from_subset(element);
+        let eps = T::zero();
+        Self::new(re, eps)
+    }
+}
+
+impl<TSuper, T> simba::scalar::SubsetOf<Dual<TSuper>> for Dual<T>
+where 
+    TSuper: DualNumFloat + simba::scalar::SupersetOf<T>,
+    T: DualNumFloat
+{
+    #[inline(always)]
+    fn to_superset(&self) -> Dual<TSuper> {
+        let re = TSuper::from_subset(&self.re);
+        let eps = TSuper::from_subset(&self.eps);
+        Dual {
+            re,
+            eps,
         }
     }
-);
 
-impl_from_primitive_for_scalar!(f32);
-impl_from_primitive_for_scalar!(f64);
-
-macro_rules! impl_complex_field_for_scalar(
-    ($t:ty) => {
-        impl nalgebra::ComplexField for Dual<$t> {
-            type RealField = Self;
-
-            #[inline]
-            fn from_real(re: Self::RealField) -> Self {
-                re
-            }
-
-            #[inline]
-            fn real(self) -> Self::RealField {
-                self
-            }
-
-            #[inline]
-            fn imaginary(self) -> Self::RealField {
-                Self::zero()
-            }
-
-            #[inline]
-            fn norm1(self) -> Self::RealField {
-                self.abs()
-            }
-
-            #[inline]
-            fn modulus(self) -> Self::RealField {
-                self.abs()
-            }
-
-            #[inline]
-            fn modulus_squared(self) -> Self::RealField {
-                self * self
-            }
-
-            #[inline]
-            fn argument(self) -> Self::RealField {
-                if self >= Self::zero() {
-                    Self::zero()
-                } else {
-                    Self::pi()
-                }
-            }
-
-            #[inline]
-            fn to_exp(self) -> (Self, Self) {
-                todo!()
-            }
-
-            #[inline]
-            fn recip(self) -> Self {
-                todo!()
-            }
-
-            #[inline]
-            fn conjugate(self) -> Self {
-                self
-            }
-
-            #[inline]
-            fn scale(self, factor: Self::RealField) -> Self {
-                self * factor
-            }
-
-            #[inline]
-            fn unscale(self, factor: Self::RealField) -> Self {
-                self / factor
-            }
-
-            #[inline]
-            fn floor(self) -> Self {
-                panic!("called floor() on a dual number")
-            }
-
-            #[inline]
-            fn ceil(self) -> Self {
-                panic!("called ceil() on a dual number")
-            }
-
-            #[inline]
-            fn round(self) -> Self {
-                panic!("called round() on a dual number")
-            }
-
-            #[inline]
-            fn trunc(self) -> Self {
-                panic!("called trunc() on a dual number")
-            }
-
-            #[inline]
-            fn fract(self) -> Self {
-                panic!("called fract() on a dual number")
-            }
-
-            #[inline]
-            fn abs(self) -> Self::RealField {
-                Signed::abs(&self)
-            }
-
-            #[inline]
-            fn signum(self) -> Self {
-                todo!()
-            }
-
-            #[inline]
-            fn mul_add(self, a: Self, b: Self) -> Self {
-                todo!()
-            }
-
-            #[inline]
-            fn powi(self, n: i32) -> Self {
-                todo!()
-            }
-        }
+    #[inline(always)]
+    fn from_superset_unchecked(element: &Dual<TSuper>) -> Self {
+        let re = TSuper::to_subset_unchecked(&element.re);
+        let eps = TSuper::to_subset_unchecked(&element.eps);
+        Self::new(re, eps)
     }
-);
 
-impl_complex_field_for_scalar!(f32);
-impl_complex_field_for_scalar!(f64);
+    #[inline(always)]
+    fn is_in_subset(element: &Dual<TSuper>) -> bool {
+        TSuper::is_in_subset(&element.re) && TSuper::is_in_subset(&element.eps)
+    }
+}
+
+impl<T> ComplexField for Dual<T>
+where
+    T: DualNumFloat,
+    T: simba::scalar::SubsetOf<Dual<T>>,
+    T: simba::scalar::SupersetOf<T>,
+    T: simba::scalar::SupersetOf<f64>,
+    T: approx::RelativeEq + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
+{
+    type RealField = Self;
+
+    #[doc = r" Builds a pure-real complex number from the given value."]
+    fn from_real(re:Self::RealField) -> Self {
+        todo!()
+    }
+
+    #[doc = r" The real part of this complex number."]
+    fn real(self) -> Self::RealField {
+        todo!()
+    }
+
+    #[doc = r" The imaginary part of this complex number."]
+    fn imaginary(self) -> Self::RealField {
+        todo!()
+    }
+
+    #[doc = r" The modulus of this complex number."]
+    fn modulus(self) -> Self::RealField {
+        todo!()
+    }
+
+    #[doc = r" The squared modulus of this complex number."]
+    fn modulus_squared(self) -> Self::RealField {
+        todo!()
+    }
+
+    #[doc = r" The argument of this complex number."]
+    fn argument(self) -> Self::RealField {
+        todo!()
+    }
+
+    #[doc = r" The sum of the absolute value of this complex number's real and imaginary part."]
+    fn norm1(self) -> Self::RealField {
+        todo!()
+    }
+
+    #[doc = r" Multiplies this complex number by `factor`."]
+    fn scale(self,factor:Self::RealField) -> Self {
+        todo!()
+    }
+
+    #[doc = r" Divides this complex number by `factor`."]
+    fn unscale(self,factor:Self::RealField) -> Self {
+        todo!()
+    }
+
+    fn floor(self) -> Self {
+        todo!()
+    }
+
+    fn ceil(self) -> Self {
+        todo!()
+    }
+
+    fn round(self) -> Self {
+        todo!()
+    }
+
+    fn trunc(self) -> Self {
+        todo!()
+    }
+
+    fn fract(self) -> Self {
+        todo!()
+    }
+
+    fn mul_add(self,a:Self,b:Self) -> Self {
+        todo!()
+    }
+
+    #[doc = r" The absolute value of this complex number: `self / self.signum()`."]
+    #[doc = r""]
+    #[doc = r" This is equivalent to `self.modulus()`."]
+    fn abs(self) -> Self::RealField {
+        todo!()
+    }
+
+    #[doc = r" Computes (self.conjugate() * self + other.conjugate() * other).sqrt()"]
+    fn hypot(self,other:Self) -> Self::RealField {
+        todo!()
+    }
+
+    fn recip(self) -> Self {
+        todo!()
+    }
+
+    fn conjugate(self) -> Self {
+        todo!()
+    }
+
+    fn sin(self) -> Self {
+        todo!()
+    }
+
+    fn cos(self) -> Self {
+        todo!()
+    }
+
+    fn sin_cos(self) -> (Self,Self) {
+        todo!()
+    }
+
+    fn tan(self) -> Self {
+        todo!()
+    }
+
+    fn asin(self) -> Self {
+        todo!()
+    }
+
+    fn acos(self) -> Self {
+        todo!()
+    }
+
+    fn atan(self) -> Self {
+        todo!()
+    }
+
+    fn sinh(self) -> Self {
+        todo!()
+    }
+
+    fn cosh(self) -> Self {
+        todo!()
+    }
+
+    fn tanh(self) -> Self {
+        todo!()
+    }
+
+    fn asinh(self) -> Self {
+        todo!()
+    }
+
+    fn acosh(self) -> Self {
+        todo!()
+    }
+
+    fn atanh(self) -> Self {
+        todo!()
+    }
+
+    fn log(self,base:Self::RealField) -> Self {
+        todo!()
+    }
+
+    fn log2(self) -> Self {
+        todo!()
+    }
+
+    fn log10(self) -> Self {
+        todo!()
+    }
+
+    fn ln(self) -> Self {
+        todo!()
+    }
+
+    fn ln_1p(self) -> Self {
+        todo!()
+    }
+
+    fn sqrt(self) -> Self {
+        todo!()
+    }
+
+    fn exp(self) -> Self {
+        todo!()
+    }
+
+    fn exp2(self) -> Self {
+        todo!()
+    }
+
+    fn exp_m1(self) -> Self {
+        todo!()
+    }
+
+    fn powi(self,n:i32) -> Self {
+        todo!()
+    }
+
+    fn powf(self,n:Self::RealField) -> Self {
+        todo!()
+    }
+
+    fn powc(self,n:Self) -> Self {
+        todo!()
+    }
+
+    fn cbrt(self) -> Self {
+        todo!()
+    }
+
+    fn is_finite(&self) -> bool {
+        todo!()
+    }
+
+    fn try_sqrt(self) -> Option<Self> {
+        todo!()
+    }
+}
 
 
 
-
-/*
 impl<T> RealField for Dual<T>
 where
-    T: DualNumFloat
+    T: DualNumFloat,
+    T: simba::scalar::SubsetOf<Dual<T>>,
+    T: simba::scalar::SupersetOf<f64>,
+    T: approx::RelativeEq + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
 {
 
     #[inline]
@@ -477,7 +651,7 @@ where
 
     #[inline]
     fn atan2(self, other: Self) -> Self {
-        DualNum::atan2(&self, other)
+        todo!()
     }
 
     #[inline]
@@ -600,5 +774,3 @@ where
     }
 
 }
-
-*/
