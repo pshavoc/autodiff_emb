@@ -587,7 +587,7 @@ where
     }
 
     fn mul_add(self,a:Self,b:Self) -> Self {
-        todo!()
+        todo!("mul_add() not yet implemented for Dual numbers");
     }
 
     #[doc = r" The absolute value of this complex number: `self / self.signum()`."]
@@ -599,11 +599,11 @@ where
 
     #[doc = r" Computes (self.conjugate() * self + other.conjugate() * other).sqrt()"]
     fn hypot(self,other:Self) -> Self::RealField {
-        todo!()
+        todo!("hypot() not yet implemented for Dual numbers");
     }
 
     fn recip(self) -> Self {
-        todo!()
+        todo!("recip() not yet implemented for Dual numbers");
     }
 
     fn conjugate(self) -> Self {
@@ -617,117 +617,114 @@ where
 
         #[cfg(any(feature = "std", feature = "libm"))]
         DualNum::sin(&self)
-
-        
-        
     }
 
     fn cos(self) -> Self {
-        todo!()
+        todo!("cos() not yet implemented for Dual numbers");
     }
 
     fn sin_cos(self) -> (Self,Self) {
-        todo!()
+        todo!("sin_cos() not yet implemented for Dual numbers");
     }
 
     fn tan(self) -> Self {
-        todo!()
+        todo!("tan() not yet implemented for Dual numbers");
     }
 
     fn asin(self) -> Self {
-        todo!()
+        todo!("asin() not yet implemented for Dual numbers");
     }
 
     fn acos(self) -> Self {
-        todo!()
+        todo!("acos() not yet implemented for Dual numbers");
     }
 
     fn atan(self) -> Self {
-        todo!()
+        todo!("atan() not yet implemented for Dual numbers");
     }
 
     fn sinh(self) -> Self {
-        todo!()
+        todo!("sinh() not yet implemented for Dual numbers");
     }
 
     fn cosh(self) -> Self {
-        todo!()
+        todo!("cosh() not yet implemented for Dual numbers");
     }
 
     fn tanh(self) -> Self {
-        todo!()
+        todo!("tanh() not yet implemented for Dual numbers");
     }
 
     fn asinh(self) -> Self {
-        todo!()
+        todo!("asinh() not yet implemented for Dual numbers");
     }
 
     fn acosh(self) -> Self {
-        todo!()
+        todo!("acosh() not yet implemented for Dual numbers");
     }
 
     fn atanh(self) -> Self {
-        todo!()
+        todo!("atanh() not yet implemented for Dual numbers");
     }
 
     fn log(self,base:Self::RealField) -> Self {
-        todo!()
+        todo!("log() not yet implemented for Dual numbers");
     }
 
     fn log2(self) -> Self {
-        todo!()
+        todo!("log2() not yet implemented for Dual numbers");
     }
 
     fn log10(self) -> Self {
-        todo!()
+        todo!("log10() not yet implemented for Dual numbers");
     }
 
     fn ln(self) -> Self {
-        todo!()
+        todo!("ln() not yet implemented for Dual numbers");
     }
 
     fn ln_1p(self) -> Self {
-        todo!()
+        todo!("ln_1p() not yet implemented for Dual numbers");
     }
 
     fn sqrt(self) -> Self {
-        todo!()
+        todo!("sqrt() not yet implemented for Dual numbers");
     }
 
     fn exp(self) -> Self {
-        todo!()
+        todo!("exp() not yet implemented for Dual numbers");
     }
 
     fn exp2(self) -> Self {
-        todo!()
+        todo!("exp2() not yet implemented for Dual numbers");
     }
 
     fn exp_m1(self) -> Self {
-        todo!()
+        todo!("exp_m1() not yet implemented for Dual numbers");
     }
 
     fn powi(self,n:i32) -> Self {
-        todo!()
+        todo!("powi() not yet implemented for Dual numbers");
     }
 
     fn powf(self,n:Self::RealField) -> Self {
-        todo!()
+        todo!("powf() not yet implemented for Dual numbers");
     }
 
     fn powc(self,n:Self) -> Self {
-        todo!()
+        todo!("powc() not yet implemented for Dual numbers");
     }
 
     fn cbrt(self) -> Self {
-        todo!()
+        todo!("cbrt() not yet implemented for Dual numbers");
     }
 
     fn is_finite(&self) -> bool {
-        todo!()
+        todo!("is_finite() not yet implemented for Dual numbers");
     }
 
     fn try_sqrt(self) -> Option<Self> {
-        todo!()
+        todo!("try_sqrt() not yet implemented for Dual numbers");
     }
 }
 
