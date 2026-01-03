@@ -58,30 +58,31 @@ pub trait RealDualNum<T>: DualNum<T> + RealField
 where T: DualNumFloat {}
 
 
-pub fn jacobian<G, F, const N: usize, const M: usize>(
+pub fn jacobian<G, F, I, const N: usize, const M: usize>(
     g: G,
-    x: VectorView<'_, Dual<F>, nalgebra::Const<N>>,
-) -> SMatrix<F, N, M>
+    x: VectorView<'_, I, nalgebra::Const<N>>,
+) -> SMatrix<F, M, N>
 where
     G: Fn(VectorView<'_, Dual<F>, nalgebra::Const<N>>) -> SVector<Dual<F>, { M }>,
     F: DualNumFloat,
+    I: Into<F> + Copy,
 {
-    let mut jac = SMatrix::<F, N, M>::zeros();
+    let mut jac = SMatrix::<F, M, N>::zeros();
     let mut x_p = SVector::<Dual<F>, N>::zeros();
 
     for i in 0..N {
         for j in 0..N {
             if i == j {
-                x_p[j] = x[j].derivative();
+                x_p[j] = Dual::from_re(x[j].into()).derivative();
             } else {
-                x_p[j] = Dual::from_re(x[j].re);
+                x_p[j] = Dual::from_re(x[j].into());
             }
         }
 
         let y = g(x_p.as_view());
 
         for k in 0..M {
-            jac[(i, k)] = y[k].eps;
+            jac[(k, i)] = y[k].eps;
         }
     }
 
@@ -111,11 +112,12 @@ mod tests {
             OVector::<Dual32, U1>::from_row_slice(&[y])
         }
 
-        let x = SVector::<Dual32, 2>::from_row_slice(&[Dual32::from_re(3.0), Dual32::from_re(5.0)]);
+        let x = SVector::<f32, 2>::from_row_slice(&[3.0, 5.0]);
         // let x_view: nalgebra::VectorView<'_, f32, nalgebra::U2> = x.as_view();
 
         let jac = jacobian(my_fn, x.as_view());
+        assert_eq!(jac.shape(), (1, 2));
         assert_eq!(jac[(0, 0)], 6.0);
-        assert_eq!(jac[(1, 0)], 2.0);
+        assert_eq!(jac[(0, 1)], 2.0);
     }
 }
