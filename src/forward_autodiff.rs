@@ -11,7 +11,7 @@ pub type Dual32 = Dual<f32>;
 pub type Dual64 = Dual<f64>;
 
 impl<T> DualNum<T> for Dual<T>
-where 
+where
     T: DualNumFloat,
 {
     #[cfg(any(feature = "std", feature = "libm"))]
@@ -19,10 +19,17 @@ where
         let (s, c) = self.re.sin_cos();
         self.chain_rule(s, c)
     }
+
+    #[cfg(any(feature = "std", feature = "libm"))]
+    fn cos(&self) -> Self {
+        let (s, c) = self.re.sin_cos();
+        self.chain_rule(c, -s)
+    }
 }
 
 impl<T> From<T> for Dual<T>
-where T: DualNumFloat,
+where
+    T: DualNumFloat,
 {
     fn from(value: T) -> Self {
         Self::from_re(value)
@@ -30,7 +37,8 @@ where T: DualNumFloat,
 }
 
 impl<T> Add<T> for Dual<T>
-where T: DualNumFloat,
+where
+    T: DualNumFloat,
 {
     type Output = Dual<T>;
 
@@ -40,7 +48,8 @@ where T: DualNumFloat,
 }
 
 impl<T> Sub<T> for Dual<T>
-where T: DualNumFloat,
+where
+    T: DualNumFloat,
 {
     type Output = Dual<T>;
 
@@ -50,7 +59,8 @@ where T: DualNumFloat,
 }
 
 impl<T> Mul<T> for Dual<T>
-where T: DualNumFloat,
+where
+    T: DualNumFloat,
 {
     type Output = Dual<T>;
 
@@ -60,7 +70,8 @@ where T: DualNumFloat,
 }
 
 impl<T> Div<T> for Dual<T>
-where T: DualNumFloat,
+where
+    T: DualNumFloat,
 {
     type Output = Dual<T>;
 
@@ -70,7 +81,8 @@ where T: DualNumFloat,
 }
 
 impl<T> Rem<T> for Dual<T>
-where T: DualNumFloat,
+where
+    T: DualNumFloat,
 {
     type Output = Dual<T>;
 
@@ -377,9 +389,9 @@ where
 
 impl<T> nalgebra::Field for Dual<T> where T: DualNumFloat {}
 
-
 impl<T> FromPrimitive for Dual<T>
-where T: DualNumFloat
+where
+    T: DualNumFloat,
 {
     fn from_i64(n: i64) -> Option<Self> {
         Some(Self::from_re(T::from_i64(n)?))
@@ -399,34 +411,41 @@ where T: DualNumFloat
 }
 
 impl<T> approx::AbsDiffEq for Dual<T>
-where T: DualNumFloat + approx::AbsDiffEq<Epsilon = T>,
+where
+    T: DualNumFloat + approx::AbsDiffEq<Epsilon = T>,
 {
     type Epsilon = Self;
-    
+
     fn default_epsilon() -> Self::Epsilon {
         Self::from_re(T::default_epsilon())
     }
-    
+
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
         self.re.abs_diff_eq(&other.re, epsilon.re)
     }
 }
 
 impl<T> approx::RelativeEq for Dual<T>
-where T: DualNumFloat + approx::AbsDiffEq<Epsilon = T>,
+where
+    T: DualNumFloat + approx::AbsDiffEq<Epsilon = T>,
 {
     fn default_max_relative() -> Self::Epsilon {
         todo!()
     }
 
-    fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon)
-        -> bool {
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
         todo!()
     }
 }
 
 impl<T> approx::UlpsEq for Dual<T>
-where T: DualNumFloat + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
+where
+    T: DualNumFloat + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
 {
     fn default_max_ulps() -> u32 {
         todo!()
@@ -438,9 +457,9 @@ where T: DualNumFloat + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
 }
 
 impl<T> simba::scalar::SupersetOf<f32> for Dual<T>
-where T: DualNumFloat + simba::scalar::SupersetOf<f32> 
+where
+    T: DualNumFloat + simba::scalar::SupersetOf<f32>,
 {
-
     #[inline(always)]
     fn is_in_subset(&self) -> bool {
         self.re.is_in_subset()
@@ -460,9 +479,9 @@ where T: DualNumFloat + simba::scalar::SupersetOf<f32>
 }
 
 impl<T> simba::scalar::SupersetOf<f64> for Dual<T>
-where T: DualNumFloat + simba::scalar::SupersetOf<f64> 
+where
+    T: DualNumFloat + simba::scalar::SupersetOf<f64>,
 {
-
     #[inline(always)]
     fn is_in_subset(&self) -> bool {
         self.re.is_in_subset()
@@ -482,18 +501,15 @@ where T: DualNumFloat + simba::scalar::SupersetOf<f64>
 }
 
 impl<FSuper, F> simba::scalar::SubsetOf<Dual<FSuper>> for Dual<F>
-where 
+where
     FSuper: DualNumFloat + simba::scalar::SupersetOf<F>,
-    F: DualNumFloat
+    F: DualNumFloat,
 {
     #[inline(always)]
     fn to_superset(&self) -> Dual<FSuper> {
         let re = FSuper::from_subset(&self.re);
         let eps = FSuper::from_subset(&self.eps);
-        Dual {
-            re,
-            eps,
-        }
+        Dual { re, eps }
     }
 
     #[inline(always)]
@@ -522,7 +538,7 @@ where
     type RealField = Self;
 
     #[doc = r" Builds a pure-real complex number from the given value."]
-    fn from_real(re:Self::RealField) -> Self {
+    fn from_real(re: Self::RealField) -> Self {
         re
     }
 
@@ -586,7 +602,7 @@ where
         panic!("called fract() on a dual number")
     }
 
-    fn mul_add(self,a:Self,b:Self) -> Self {
+    fn mul_add(self, a: Self, b: Self) -> Self {
         todo!("mul_add() not yet implemented for Dual numbers");
     }
 
@@ -598,7 +614,7 @@ where
     }
 
     #[doc = r" Computes (self.conjugate() * self + other.conjugate() * other).sqrt()"]
-    fn hypot(self,other:Self) -> Self::RealField {
+    fn hypot(self, other: Self) -> Self::RealField {
         todo!("hypot() not yet implemented for Dual numbers");
     }
 
@@ -611,7 +627,6 @@ where
     }
 
     fn sin(self) -> Self {
-
         #[cfg(not(any(feature = "std", feature = "libm")))]
         panic!("sin() not available because neither the 'std' nor the 'libm' feature is enabled");
 
@@ -620,10 +635,14 @@ where
     }
 
     fn cos(self) -> Self {
-        todo!("cos() not yet implemented for Dual numbers");
+        #[cfg(not(any(feature = "std", feature = "libm")))]
+        panic!("cos() not available because neither the 'std' nor the 'libm' feature is enabled");
+
+        #[cfg(any(feature = "std", feature = "libm"))]
+        DualNum::cos(&self)
     }
 
-    fn sin_cos(self) -> (Self,Self) {
+    fn sin_cos(self) -> (Self, Self) {
         todo!("sin_cos() not yet implemented for Dual numbers");
     }
 
@@ -667,7 +686,7 @@ where
         todo!("atanh() not yet implemented for Dual numbers");
     }
 
-    fn log(self,base:Self::RealField) -> Self {
+    fn log(self, base: Self::RealField) -> Self {
         todo!("log() not yet implemented for Dual numbers");
     }
 
@@ -703,15 +722,15 @@ where
         todo!("exp_m1() not yet implemented for Dual numbers");
     }
 
-    fn powi(self,n:i32) -> Self {
+    fn powi(self, n: i32) -> Self {
         todo!("powi() not yet implemented for Dual numbers");
     }
 
-    fn powf(self,n:Self::RealField) -> Self {
+    fn powf(self, n: Self::RealField) -> Self {
         todo!("powf() not yet implemented for Dual numbers");
     }
 
-    fn powc(self,n:Self) -> Self {
+    fn powc(self, n: Self) -> Self {
         todo!("powc() not yet implemented for Dual numbers");
     }
 
@@ -728,8 +747,6 @@ where
     }
 }
 
-
-
 impl<T> RealField for Dual<T>
 where
     T: DualNumFloat,
@@ -740,7 +757,6 @@ where
     T: simba::scalar::SupersetOf<f64>,
     T: approx::RelativeEq + approx::UlpsEq + approx::AbsDiffEq<Epsilon = T>,
 {
-
     #[inline]
     fn copysign(self, sign: Self) -> Self {
         if sign.re.is_sign_positive() {
@@ -873,5 +889,4 @@ where
     fn max_value() -> Option<Self> {
         Some(Self::from_re(T::max_value()))
     }
-
 }

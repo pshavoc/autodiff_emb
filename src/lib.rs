@@ -28,7 +28,7 @@ pub mod prelude {
     pub(crate) use num_traits::{FloatConst, FromPrimitive, Num, NumOps, One, Signed, Zero};
 
     pub(crate) use nalgebra::{
-        ComplexField, Field, RealField, SMatrix, SVector, SimdValue, VectorView, SimdPartialOrd
+        ComplexField, Field, RealField, SMatrix, SVector, SimdPartialOrd, SimdValue, VectorView,
     };
 }
 
@@ -37,26 +37,54 @@ pub use forward_autodiff::*;
 
 use prelude::*;
 
-pub trait DualNumFloat: Float + FloatConst + SimdValue<Element = Self, SimdBool = bool> + SimdPartialOrd + FromPrimitive + Clone + Copy + Send + Sync + fmt::Debug + fmt::Display + 'static {}
+pub trait DualNumFloat:
+    Float
+    + FloatConst
+    + SimdValue<Element = Self, SimdBool = bool>
+    + SimdPartialOrd
+    + FromPrimitive
+    + Clone
+    + Copy
+    + Send
+    + Sync
+    + fmt::Debug
+    + fmt::Display
+    + 'static
+{
+}
 
 impl DualNumFloat for f32 {}
 impl DualNumFloat for f64 {}
 
 pub trait DualNum<T>
 where
-    Self: Field + FromPrimitive + From<T> + NumOps<T> + Clone + Copy + Send + Sync + Any + fmt::Debug + fmt::Display + 'static,
+    Self: Field
+        + FromPrimitive
+        + From<T>
+        + NumOps<T>
+        + Clone
+        + Copy
+        + Send
+        + Sync
+        + Any
+        + fmt::Debug
+        + fmt::Display
+        + 'static,
     T: DualNumFloat,
 {
-
     #[cfg(any(feature = "std", feature = "libm"))]
     fn sin(&self) -> Self;
 
+    #[cfg(any(feature = "std", feature = "libm"))]
+    fn cos(&self) -> Self;
 }
 
 #[cfg(any(feature = "std", feature = "libm"))]
 pub trait RealDualNum<T>: DualNum<T> + RealField
-where T: DualNumFloat {}
-
+where
+    T: DualNumFloat,
+{
+}
 
 pub fn jacobian<G, F, I, const N: usize, const M: usize>(
     g: G,
