@@ -80,6 +80,9 @@ where
 
     #[cfg(any(feature = "std", feature = "libm"))]
     fn sin_cos(&self) -> (Self, Self);
+
+    #[cfg(any(feature = "std", feature = "libm"))]
+    fn sqrt(&self) -> Self;
 }
 
 #[cfg(any(feature = "std", feature = "libm"))]

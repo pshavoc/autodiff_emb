@@ -34,6 +34,16 @@ where
             self.chain_rule(c, -s),
         )
     }
+
+    #[cfg(any(feature = "std", feature = "libm"))]
+    fn sqrt(&self) -> Self {
+        let rec = self.re.recip();
+        let half = T::from(0.5).unwrap();
+        let f0 = self.re.sqrt();
+        let f1 = f0 * rec * half;
+        self.chain_rule(f0, f1) 
+    }
+
 }
 
 impl<T> From<T> for Dual<T>
@@ -720,7 +730,11 @@ where
     }
 
     fn sqrt(self) -> Self {
-        todo!("sqrt() not yet implemented for Dual numbers");
+        #[cfg(not(any(feature = "std", feature = "libm")))]
+        panic!("sqrt() not available because neither the 'std' nor the 'libm' feature is enabled");
+
+        #[cfg(any(feature = "std", feature = "libm"))]
+        DualNum::sqrt(&self)
     }
 
     fn exp(self) -> Self {
@@ -901,5 +915,19 @@ where
     #[inline]
     fn max_value() -> Option<Self> {
         Some(Self::from_re(T::max_value()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[cfg(any(feature = "std", feature = "libm"))]
+    #[test]
+    fn test_sqrt() {
+        let x = Dual64::from_re(4.0).derivative();
+        let y = x.sqrt();
+        assert_eq!(y.re, 2.0);
+        assert_eq!(y.eps, 0.25);
     }
 }
