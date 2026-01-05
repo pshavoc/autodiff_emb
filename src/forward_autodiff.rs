@@ -25,6 +25,15 @@ where
         let (s, c) = self.re.sin_cos();
         self.chain_rule(c, -s)
     }
+
+    #[cfg(any(feature = "std", feature = "libm"))]
+    fn sin_cos(&self) -> (Self, Self) {
+        let (s, c) = self.re.sin_cos();
+        (
+            self.chain_rule(s, c),
+            self.chain_rule(c, -s),
+        )
+    }
 }
 
 impl<T> From<T> for Dual<T>
@@ -643,7 +652,11 @@ where
     }
 
     fn sin_cos(self) -> (Self, Self) {
-        todo!("sin_cos() not yet implemented for Dual numbers");
+        #[cfg(not(any(feature = "std", feature = "libm")))]
+        panic!("sin_cos() not available because neither the 'std' nor the 'libm' feature is enabled");
+
+        #[cfg(any(feature = "std", feature = "libm"))]
+        DualNum::sin_cos(&self)
     }
 
     fn tan(self) -> Self {

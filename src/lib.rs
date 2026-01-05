@@ -77,6 +77,9 @@ where
 
     #[cfg(any(feature = "std", feature = "libm"))]
     fn cos(&self) -> Self;
+
+    #[cfg(any(feature = "std", feature = "libm"))]
+    fn sin_cos(&self) -> (Self, Self);
 }
 
 #[cfg(any(feature = "std", feature = "libm"))]
