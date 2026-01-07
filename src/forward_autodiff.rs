@@ -29,10 +29,7 @@ where
     #[cfg(any(feature = "std", feature = "libm"))]
     fn sin_cos(&self) -> (Self, Self) {
         let (s, c) = self.re.sin_cos();
-        (
-            self.chain_rule(s, c),
-            self.chain_rule(c, -s),
-        )
+        (self.chain_rule(s, c), self.chain_rule(c, -s))
     }
 
     #[cfg(any(feature = "std", feature = "libm"))]
@@ -41,9 +38,8 @@ where
         let half = T::from(0.5).unwrap();
         let f0 = self.re.sqrt();
         let f1 = f0 * rec * half;
-        self.chain_rule(f0, f1) 
+        self.chain_rule(f0, f1)
     }
-
 }
 
 impl<T> From<T> for Dual<T>
@@ -357,10 +353,7 @@ where
 {
     type Element = Dual<T::Element>;
     type SimdBool = T::SimdBool;
-
-    fn lanes() -> usize {
-        T::lanes()
-    }
+    const LANES: usize = T::LANES;
 
     #[inline]
     fn splat(val: Self::Element) -> Self {
@@ -663,7 +656,9 @@ where
 
     fn sin_cos(self) -> (Self, Self) {
         #[cfg(not(any(feature = "std", feature = "libm")))]
-        panic!("sin_cos() not available because neither the 'std' nor the 'libm' feature is enabled");
+        panic!(
+            "sin_cos() not available because neither the 'std' nor the 'libm' feature is enabled"
+        );
 
         #[cfg(any(feature = "std", feature = "libm"))]
         DualNum::sin_cos(&self)
