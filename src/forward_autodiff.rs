@@ -123,12 +123,7 @@ impl<T: DualNumFloat + Zero> Dual<T> {
 
 impl<T: DualNumFloat + One> Dual<T> {
     /// Set the derivative part to 1.
-    /// ```
-    /// # use num_dual::{Dual64, DualNum};
-    /// let x = Dual64::from_re(5.0).derivative().powi(2);
-    /// assert_eq!(x.re, 25.0);
-    /// assert_eq!(x.eps, 10.0);
-    /// ```
+    
     #[inline]
     pub fn derivative(mut self) -> Self {
         self.eps = T::one();

@@ -94,10 +94,10 @@ where
 
 pub fn jacobian<G, F, I, const N: usize, const M: usize>(
     g: G,
-    x: VectorView<'_, I, nalgebra::Const<N>>,
+    x: &nalgebra::SVector<I, N>,
 ) -> SMatrix<F, M, N>
 where
-    G: Fn(VectorView<'_, Dual<F>, nalgebra::Const<N>>) -> SVector<Dual<F>, { M }>,
+    G: Fn(&nalgebra::SVector<Dual<F>, N>) -> SVector<Dual<F>, M>,
     F: DualNumFloat,
     I: Into<F> + Copy,
 {
@@ -113,7 +113,7 @@ where
             }
         }
 
-        let y = g(x_p.as_view());
+        let y = g(&x_p);
 
         for k in 0..M {
             jac[(k, i)] = y[k].eps;
@@ -141,7 +141,7 @@ mod tests {
     fn test_jacobian() {
         use nalgebra::{OVector, SVector, U1, U2, VectorView};
 
-        fn my_fn(x: VectorView<'_, Dual32, U2>) -> OVector<Dual32, U1> {
+        fn my_fn(x: &SVector<Dual32, 2>) -> OVector<Dual32, U1> {
             let y = x[0] * x[0] + Dual32::from_re(2.0) * x[1];
             OVector::<Dual32, U1>::from_row_slice(&[y])
         }
@@ -149,7 +149,7 @@ mod tests {
         let x = SVector::<f32, 2>::from_row_slice(&[3.0, 5.0]);
         // let x_view: nalgebra::VectorView<'_, f32, nalgebra::U2> = x.as_view();
 
-        let jac = jacobian(my_fn, x.as_view());
+        let jac = jacobian(my_fn, &x);
         assert_eq!(jac.shape(), (1, 2));
         assert_eq!(jac[(0, 0)], 6.0);
         assert_eq!(jac[(0, 1)], 2.0);
