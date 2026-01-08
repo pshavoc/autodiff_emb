@@ -92,16 +92,15 @@ where
 {
 }
 
-pub fn jacobian<'a, G, F, I, const N: usize, const M: usize, RStride, CStride>(
+pub fn jacobian<'a, G, F, I, const N: usize, const M: usize, S>(
     g: G,
-    x: nalgebra::Matrix<I, nalgebra::Const<N>, nalgebra::U1, nalgebra::ViewStorage<'a, I, nalgebra::Const<N>, nalgebra::U1, RStride, CStride>>,
+    x: &nalgebra::Vector<I, nalgebra::Const<N>, S>,
 ) -> SMatrix<F, M, N>
 where
     G: Fn(&nalgebra::SVector<Dual<F>, N>) -> SVector<Dual<F>, M>,
     F: DualNumFloat,
     I: Into<F> + Copy,
-    RStride: nalgebra::Dim,
-    CStride: nalgebra::Dim,
+    S: nalgebra::RawStorage<I, nalgebra::Const<N>>,
 {
     let mut jac = SMatrix::<F, M, N>::zeros();
     let mut x_p = SVector::<Dual<F>, N>::zeros();
@@ -153,7 +152,7 @@ mod tests {
         let x = SVector::<f32, 2>::from_row_slice(&[3.0, 5.0]);
         let x_view: nalgebra::VectorView<'_, f32, nalgebra::U2> = x.as_view();
 
-        let jac = jacobian(my_fn, x_view);
+        let jac = jacobian(my_fn, &x_view);
         assert_eq!(jac.shape(), (1, 2));
         assert_eq!(jac[(0, 0)], 6.0);
         assert_eq!(jac[(0, 1)], 2.0);
@@ -171,7 +170,7 @@ mod tests {
             SVector::<Dual32, 1>::from_row_slice(&[y])
         }
 
-        let jac = jacobian(my_fn, x_subset);
+        let jac = jacobian(my_fn, &x_subset);
         assert_eq!(jac.shape(), (1, 2));
         assert_eq!(jac[(0, 0)], 2.0);
         assert_eq!(jac[(0, 1)], 2.0);
