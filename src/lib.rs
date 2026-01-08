@@ -92,14 +92,16 @@ where
 {
 }
 
-pub fn jacobian<G, F, I, const N: usize, const M: usize>(
+pub fn jacobian<'a, G, F, I, const N: usize, const M: usize, RStride, CStride>(
     g: G,
-    x: &nalgebra::SVector<I, N>,
+    x: nalgebra::Matrix<I, nalgebra::Const<N>, nalgebra::U1, nalgebra::ViewStorage<'a, I, nalgebra::Const<N>, nalgebra::U1, RStride, CStride>>,
 ) -> SMatrix<F, M, N>
 where
     G: Fn(&nalgebra::SVector<Dual<F>, N>) -> SVector<Dual<F>, M>,
     F: DualNumFloat,
     I: Into<F> + Copy,
+    RStride: nalgebra::Dim,
+    CStride: nalgebra::Dim,
 {
     let mut jac = SMatrix::<F, M, N>::zeros();
     let mut x_p = SVector::<Dual<F>, N>::zeros();
@@ -126,6 +128,8 @@ where
 #[cfg(test)]
 mod tests {
 
+    use nalgebra::{OVector, SVector, U1, U2, VectorView};
+
     use super::*;
     #[test]
     fn test_derivative() {
@@ -139,7 +143,7 @@ mod tests {
 
     #[test]
     fn test_jacobian() {
-        use nalgebra::{OVector, SVector, U1, U2, VectorView};
+        
 
         fn my_fn(x: &SVector<Dual32, 2>) -> OVector<Dual32, U1> {
             let y = x[0] * x[0] + Dual32::from_re(2.0) * x[1];
@@ -147,11 +151,29 @@ mod tests {
         }
 
         let x = SVector::<f32, 2>::from_row_slice(&[3.0, 5.0]);
-        // let x_view: nalgebra::VectorView<'_, f32, nalgebra::U2> = x.as_view();
+        let x_view: nalgebra::VectorView<'_, f32, nalgebra::U2> = x.as_view();
 
-        let jac = jacobian(my_fn, &x);
+        let jac = jacobian(my_fn, x_view);
         assert_eq!(jac.shape(), (1, 2));
         assert_eq!(jac[(0, 0)], 6.0);
+        assert_eq!(jac[(0, 1)], 2.0);
+    }
+
+    #[test]
+    fn test_jacobian_vector_view() {
+
+        let x = SVector::<f32, 3>::from_row_slice(&[1.0, 2.0, 3.0]);
+
+        let x_subset = x.fixed_rows::<2>(0);
+
+        fn my_fn(x: &SVector<Dual32, 2>) -> SVector<Dual32, 1> {
+            let y = x[0] * x[0] + Dual32::from_re(2.0) * x[1];
+            SVector::<Dual32, 1>::from_row_slice(&[y])
+        }
+
+        let jac = jacobian(my_fn, x_subset);
+        assert_eq!(jac.shape(), (1, 2));
+        assert_eq!(jac[(0, 0)], 2.0);
         assert_eq!(jac[(0, 1)], 2.0);
     }
 }
